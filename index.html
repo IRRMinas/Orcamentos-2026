@@ -343,11 +343,32 @@ function setLoad(pct, msg) {
   document.getElementById('load-msg').textContent = msg;
 }
 
-// ── FETCH API ──
-async function fetchDados() {
-  const r = await fetch(URL_API + '?cachebust=' + Date.now(), {redirect: 'follow'});
-  if (!r.ok) throw new Error('Falha ao buscar dados');
-  return await r.json();
+// ── FETCH via JSONP (contorna CORS do Apps Script) ──
+function fetchDados() {
+  return new Promise((resolve, reject) => {
+    const cb = 'cb_' + Date.now();
+    const script = document.createElement('script');
+    const timeout = setTimeout(() => {
+      delete window[cb];
+      script.remove();
+      reject(new Error('Timeout ao buscar dados'));
+    }, 15000);
+
+    window[cb] = function(data) {
+      clearTimeout(timeout);
+      delete window[cb];
+      script.remove();
+      resolve(data);
+    };
+
+    script.src = URL_API + '?callback=' + cb + '&cachebust=' + Date.now();
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[cb];
+      reject(new Error('Erro ao carregar script'));
+    };
+    document.head.appendChild(script);
+  });
 }
 
 
