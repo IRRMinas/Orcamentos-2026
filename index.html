@@ -163,7 +163,7 @@
   .val-num.zero { color:var(--muted); }
   .val-num.extra { color:var(--accent2); }
   .val-change { display:flex; flex-direction:column; gap:2px; }
-  .val-era  { font-family:var(--font-mono); font-size:10px; color:var(--muted); text-decoration:line-through; }
+  .val-era  { font-family:var(--font-mono); font-size:12px; color:var(--text2); text-decoration:line-through; }
   .val-seta { font-size:9px; color:var(--muted); }
   .val-novo { font-family:var(--font-mono); font-size:13px; color:var(--warning); font-weight:500; }
   .item-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
@@ -196,14 +196,12 @@
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loading-screen">
   <div class="loading-logo">Orçamento <span>2026</span></div>
   <div class="loading-bar-bg"><div class="loading-bar-fill" id="load-bar"></div></div>
   <div class="loading-msg" id="load-msg">Conectando à planilha...</div>
 </div>
 
-<!-- ALERT BANNER -->
 <div id="alert-banner">
   <div class="alert-header">
     <div class="alert-title">🔔 Atualização detectada</div>
@@ -214,7 +212,6 @@
 
 <div class="shell" id="main-shell" style="display:none;">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="header-left">
       <div class="eyebrow">Instituto René Rachou · Fiocruz Minas</div>
@@ -231,7 +228,6 @@
     </div>
   </div>
 
-  <!-- MEGA STATS -->
   <div class="mega-stats">
     <div class="stat-card total">
       <div class="stat-label">Total de Setores</div>
@@ -260,7 +256,6 @@
     </div>
   </div>
 
-  <!-- PROGRESS -->
   <div class="progress-section">
     <div class="progress-header">
       <div class="progress-title">Progresso Geral de Preenchimento</div>
@@ -269,10 +264,8 @@
     <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-bar" style="width:0%"></div></div>
   </div>
 
-  <!-- TOTALS -->
   <div class="totals-bar" id="totals-bar"></div>
 
-  <!-- FILTERS -->
   <div class="filters">
     <span class="filter-label">Filtrar:</span>
     <button class="filter-btn active" onclick="filtrar('todos',this)">Todos</button>
@@ -293,13 +286,9 @@
     <div id="detail-body"></div>
   </div>
 
-  <div class="section-title">Itens Extras Adicionados pelos Setores</div>
-  <div class="extras-grid" id="extras-grid"></div>
-
   <div class="footer" id="footer-txt">Dashboard Orçamentário IRR · Dados carregados da planilha Google Sheets</div>
 </div>
 
-<!-- MODAL EXTRAS -->
 <div id="modal-overlay" onclick="fecharModalExtras()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;backdrop-filter:blur(4px);"></div>
 <div id="modal-extras" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:101;width:min(680px,95vw);max-height:80vh;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:0 32px 80px rgba(0,0,0,0.6);">
   <div style="position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-radius:20px 20px 0 0;z-index:1;">
@@ -335,8 +324,6 @@ function parseNum(s) {
   return parseFloat(String(s).replace(/R\$\s*/,'').replace(/\./g,'').replace(',','.')) || 0;
 }
 
-
-
 // ── LOADING ──
 function setLoad(pct, msg) {
   document.getElementById('load-bar').style.width = pct + '%';
@@ -370,10 +357,6 @@ function fetchDados() {
     document.head.appendChild(script);
   });
 }
-
-
-
-
 
 // ── SNAPSHOT para detectar mudanças ──
 function gerarSnapshot(dados, extras) {
@@ -515,24 +498,6 @@ function renderDashboard() {
     const matchB = setor.toLowerCase().includes(buscaAtual);
     if (!matchF || !matchB) card.classList.add('hidden');
     grid.appendChild(card);
-  });
-
-  // Extras grid
-  const eg = document.getElementById('extras-grid');
-  eg.innerHTML = '';
-  EXTRAS.forEach(e => {
-    const card = document.createElement('div');
-    card.className = 'extra-card';
-    card.innerHTML = `
-      <div class="extra-setor">${e.setor}</div>
-      <div class="extra-desc">${e.descricao}</div>
-      <div class="extra-values">
-        <div><div class="extra-val-label">Maio</div><div class="extra-val-num">${fmt(e.maio)}</div></div>
-        <div><div class="extra-val-label">Junho</div><div class="extra-val-num">${fmt(e.junho)}</div></div>
-        <div><div class="extra-val-label">Julho</div><div class="extra-val-num">${fmt(e.julho)}</div></div>
-      </div>
-      ${e.justificativa ? `<div class="extra-just">${e.justificativa}</div>` : ''}`;
-    eg.appendChild(card);
   });
 
   document.getElementById('ts').textContent = new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'});
