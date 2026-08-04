@@ -70,6 +70,16 @@
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .timestamp { font-family:var(--font-mono); font-size:11px; color:var(--muted); }
 
+  /* PRAZO */
+  .prazo-bar { display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px 22px; margin-bottom:24px; flex-wrap:wrap; }
+  .prazo-bar.urgente { border-color:rgba(255,107,107,0.4); background:rgba(255,107,107,0.05); }
+  .prazo-icon { font-size:22px; }
+  .prazo-text { font-family:var(--font-mono); font-size:12px; color:var(--text2); }
+  .prazo-text strong { color:var(--text); font-size:14px; }
+  .prazo-bar.urgente .prazo-text strong { color:var(--danger); }
+  .btn-cobrar { margin-left:auto; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:100px; padding:9px 18px; font-family:var(--font-mono); font-size:11px; cursor:pointer; transition:all 0.2s; }
+  .btn-cobrar:hover { border-color:var(--accent2); color:var(--accent2); }
+
   /* MEGA STATS */
   .mega-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:32px; }
   .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; position:relative; overflow:hidden; transition:border-color 0.2s,transform 0.2s; }
@@ -208,7 +218,7 @@
     <div class="header-left">
       <div class="eyebrow">Instituto René Rachou · Fiocruz Minas</div>
       <h1>Orçamento <span>2026</span></h1>
-      <div class="subtitle">Validação Maio · Junho · Julho — Acompanhamento em tempo real</div>
+      <div class="subtitle">Validação Agosto · Setembro · Outubro — Acompanhamento em tempo real</div>
     </div>
     <div class="header-right">
       <div class="live-badge"><div class="live-dot"></div> Monitorando</div>
@@ -218,6 +228,12 @@
         <span id="sync-msg">Atualiza a cada 2 min</span>
       </div>
     </div>
+  </div>
+
+  <div class="prazo-bar" id="prazo-bar" style="display:none;">
+    <div class="prazo-icon">⏰</div>
+    <div class="prazo-text" id="prazo-text"></div>
+    <button class="btn-cobrar" onclick="copiarPendentes()" id="btn-cobrar">📋 Copiar setores pendentes</button>
   </div>
 
   <div class="mega-stats">
@@ -303,6 +319,9 @@
 // ── CONFIGURAÇÃO ──
 const URL_API      = 'https://script.google.com/macros/s/AKfycbxmbDjN3KTFbOB_xdWsIJZnXy9yo7TOnlmsrAU5b_F50YUsnCpbXLSLmo0oWacH7-ua0Q/exec';
 const INTERVALO_MS = 2 * 60 * 1000; // 2 minutos
+
+// 📅 Prazo final para preenchimento — ajuste aqui a cada trimestre (formato: 'AAAA-MM-DD')
+const PRAZO_FINAL  = '2026-09-05';
 
 // ── ESTADO ──
 let DADOS = [], EXTRAS = [];
@@ -434,11 +453,11 @@ function renderDashboard() {
   let tMaio = 0, tJunho = 0, tJulho = 0;
   DADOS.forEach(d => { tMaio += d.maio; tJunho += d.junho; tJulho += d.julho; });
   document.getElementById('totals-bar').innerHTML = `
-    <div><div class="total-item-label">Total Maio</div><div class="total-item-val">${fmt(tMaio)}</div></div>
+    <div><div class="total-item-label">Total Agosto</div><div class="total-item-val">${fmt(tMaio)}</div></div>
     <div class="total-divider"></div>
-    <div><div class="total-item-label">Total Junho</div><div class="total-item-val">${fmt(tJunho)}</div></div>
+    <div><div class="total-item-label">Total Setembro</div><div class="total-item-val">${fmt(tJunho)}</div></div>
     <div class="total-divider"></div>
-    <div><div class="total-item-label">Total Julho</div><div class="total-item-val">${fmt(tJulho)}</div></div>
+    <div><div class="total-item-label">Total Outubro</div><div class="total-item-val">${fmt(tJulho)}</div></div>
     <div class="total-divider"></div>
     <div><div class="total-item-label">Total Geral</div><div class="total-item-val">${fmt(tMaio+tJunho+tJulho)}</div></div>
   `;
@@ -479,9 +498,9 @@ function renderDashboard() {
       </div>
       <div class="setor-body">
         <div class="mini-bars">
-          <div class="mini-bar-row"><div class="mini-bar-label">Maio</div><div class="mini-bar-track"><div class="mini-bar-fill ${hasAlt?'has-alt':''}" style="width:${Math.round(tMaioS/maxV*100)}%"></div></div><div class="mini-bar-val">${fmt(tMaioS)}</div></div>
-          <div class="mini-bar-row"><div class="mini-bar-label">Junho</div><div class="mini-bar-track"><div class="mini-bar-fill ${hasAlt?'has-alt':''}" style="width:${Math.round(tJunhoS/maxV*100)}%"></div></div><div class="mini-bar-val">${fmt(tJunhoS)}</div></div>
-          <div class="mini-bar-row"><div class="mini-bar-label">Julho</div><div class="mini-bar-track"><div class="mini-bar-fill ${hasAlt?'has-alt':''}" style="width:${Math.round(tJulhoS/maxV*100)}%"></div></div><div class="mini-bar-val">${fmt(tJulhoS)}</div></div>
+          <div class="mini-bar-row"><div class="mini-bar-label">Agosto</div><div class="mini-bar-track"><div class="mini-bar-fill ${hasAlt?'has-alt':''}" style="width:${Math.round(tMaioS/maxV*100)}%"></div></div><div class="mini-bar-val">${fmt(tMaioS)}</div></div>
+          <div class="mini-bar-row"><div class="mini-bar-label">Setembro</div><div class="mini-bar-track"><div class="mini-bar-fill ${hasAlt?'has-alt':''}" style="width:${Math.round(tJunhoS/maxV*100)}%"></div></div><div class="mini-bar-val">${fmt(tJunhoS)}</div></div>
+          <div class="mini-bar-row"><div class="mini-bar-label">Outubro</div><div class="mini-bar-track"><div class="mini-bar-fill ${hasAlt?'has-alt':''}" style="width:${Math.round(tJulhoS/maxV*100)}%"></div></div><div class="mini-bar-val">${fmt(tJulhoS)}</div></div>
         </div>
       </div>
       <div class="setor-footer">
@@ -510,6 +529,55 @@ function renderDashboard() {
   });
 
   document.getElementById('ts').textContent = new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'});
+
+  // Guardar setores pendentes/parciais para o botão de cobrança
+  window.__setoresPendentes = setores.filter(s => {
+    const st = getSetorStatus(setoresMap[s]);
+    return st === 'Pendente' || st === 'Parcial';
+  });
+
+  renderPrazo();
+}
+
+// ── PRAZO / COBRANÇA ──
+function renderPrazo() {
+  const bar = document.getElementById('prazo-bar');
+  const txt = document.getElementById('prazo-text');
+  if (!PRAZO_FINAL) { bar.style.display = 'none'; return; }
+
+  const hoje = new Date();
+  const alvo = new Date(PRAZO_FINAL + 'T23:59:59');
+  const diffDias = Math.ceil((alvo - hoje) / (1000*60*60*24));
+  const nPend = (window.__setoresPendentes || []).length;
+
+  bar.style.display = 'flex';
+  bar.classList.toggle('urgente', diffDias <= 3);
+
+  let quando;
+  if (diffDias > 1) quando = `faltam <strong>${diffDias} dias</strong>`;
+  else if (diffDias === 1) quando = `<strong>encerra amanhã</strong>`;
+  else if (diffDias === 0) quando = `<strong>encerra hoje</strong>`;
+  else quando = `<strong>prazo encerrado há ${Math.abs(diffDias)} dia(s)</strong>`;
+
+  txt.innerHTML = `Prazo final: <strong>${alvo.toLocaleDateString('pt-BR')}</strong> — ${quando} · <strong style="color:var(--danger)">${nPend}</strong> setor(es) ainda pendente(s)`;
+}
+
+function copiarPendentes() {
+  const pend = window.__setoresPendentes || [];
+  const btn = document.getElementById('btn-cobrar');
+  if (!pend.length) {
+    btn.textContent = '🎉 Nenhum pendente!';
+    setTimeout(() => btn.textContent = '📋 Copiar setores pendentes', 2200);
+    return;
+  }
+  const texto = `⏰ Lembrete: os setores abaixo ainda não finalizaram a validação orçamentária (Agosto/Setembro/Outubro). Prazo: ${new Date(PRAZO_FINAL+'T00:00:00').toLocaleDateString('pt-BR')}.\n\n` + pend.map(s => `• ${s}`).join('\n');
+  navigator.clipboard.writeText(texto).then(() => {
+    btn.textContent = '✅ Copiado! Cole no e-mail/WhatsApp';
+    setTimeout(() => btn.textContent = '📋 Copiar setores pendentes', 2500);
+  }).catch(() => {
+    btn.textContent = '❌ Não foi possível copiar';
+    setTimeout(() => btn.textContent = '📋 Copiar setores pendentes', 2500);
+  });
 }
 
 // ── DETAIL ──
@@ -537,7 +605,7 @@ function abrirDetail(setor, setoresMap) {
     const chip = foiConf ? '<span class="chip chip-conf">✅ Confirmado</span>' : foiAlt ? '<span class="chip chip-alt">✏️ Alterado</span>' : '<span class="chip chip-pend">⏳ Pendente</span>';
     html += `<div class="item-row ${rowClass}"><div>
       <div class="item-desc">${item.descricao}</div>
-      <div class="item-values">${renderValor(item.maio,item.maioOrig,foiAlt,'Maio')}${renderValor(item.junho,item.junhoOrig,foiAlt,'Junho')}${renderValor(item.julho,item.julhoOrig,foiAlt,'Julho')}</div>
+      <div class="item-values">${renderValor(item.maio,item.maioOrig,foiAlt,'Agosto')}${renderValor(item.junho,item.junhoOrig,foiAlt,'Setembro')}${renderValor(item.julho,item.julhoOrig,foiAlt,'Outubro')}</div>
       ${foiAlt && item.justificativa ? `<div class="just-box">📝 ${item.justificativa}</div>` : ''}
     </div><div class="item-right">${chip}</div></div>`;
   });
@@ -548,9 +616,9 @@ function abrirDetail(setor, setoresMap) {
       html += `<div class="item-row is-extra"><div>
         <div class="item-desc extra-color">${e.descricao}</div>
         <div class="item-values">
-          <div class="val-block"><div class="val-mes">Maio</div><div class="val-num extra">${fmt(e.maio)}</div></div>
-          <div class="val-block"><div class="val-mes">Junho</div><div class="val-num extra">${fmt(e.junho)}</div></div>
-          <div class="val-block"><div class="val-mes">Julho</div><div class="val-num extra">${fmt(e.julho)}</div></div>
+          <div class="val-block"><div class="val-mes">Agosto</div><div class="val-num extra">${fmt(e.maio)}</div></div>
+          <div class="val-block"><div class="val-mes">Setembro</div><div class="val-num extra">${fmt(e.junho)}</div></div>
+          <div class="val-block"><div class="val-mes">Outubro</div><div class="val-num extra">${fmt(e.julho)}</div></div>
         </div>
         ${e.justificativa ? `<div class="just-box" style="border-color:rgba(78,205,196,0.2);background:rgba(78,205,196,0.04);color:var(--accent2);">📝 ${e.justificativa}</div>` : ''}
       </div><div class="item-right"><span class="chip chip-extra">➕ Extra</span></div></div>`;
@@ -621,9 +689,9 @@ function abrirModalExtras() {
           <div style="font-family:var(--font-mono);font-size:11px;color:var(--accent);white-space:nowrap;">${fmt(e.maio+e.junho+e.julho)}</div>
         </div>
         <div style="display:flex;gap:16px;margin-bottom:${e.justificativa?'8px':'0'};">
-          <div><div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;">Maio</div><div style="font-family:var(--font-mono);font-size:12px;color:${e.maio>0?'var(--accent2)':'var(--muted)'};">${fmt(e.maio)}</div></div>
-          <div><div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;">Junho</div><div style="font-family:var(--font-mono);font-size:12px;color:${e.junho>0?'var(--accent2)':'var(--muted)'};">${fmt(e.junho)}</div></div>
-          <div><div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;">Julho</div><div style="font-family:var(--font-mono);font-size:12px;color:${e.julho>0?'var(--accent2)':'var(--muted)'};">${fmt(e.julho)}</div></div>
+          <div><div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;">Agosto</div><div style="font-family:var(--font-mono);font-size:12px;color:${e.maio>0?'var(--accent2)':'var(--muted)'};">${fmt(e.maio)}</div></div>
+          <div><div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;">Setembro</div><div style="font-family:var(--font-mono);font-size:12px;color:${e.junho>0?'var(--accent2)':'var(--muted)'};">${fmt(e.junho)}</div></div>
+          <div><div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);text-transform:uppercase;">Outubro</div><div style="font-family:var(--font-mono);font-size:12px;color:${e.julho>0?'var(--accent2)':'var(--muted)'};">${fmt(e.julho)}</div></div>
         </div>
         ${e.justificativa ? `<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);line-height:1.5;background:rgba(78,205,196,0.04);border:1px solid rgba(78,205,196,0.12);border-radius:6px;padding:8px 10px;">📝 ${e.justificativa}</div>` : ''}
       </div>`;
